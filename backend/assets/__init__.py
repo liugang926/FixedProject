@@ -1,1 +1,1 @@
-default_app_config = 'assets.apps.AssetsConfig' 
+# 这个文件应该是空的

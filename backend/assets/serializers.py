@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models.asset import Asset, AssetCategory, AssetTransfer
+from .models import Asset, AssetCategory, AssetTransfer
+from users.models import User
 
 class AssetCategorySerializer(serializers.ModelSerializer):
     class Meta:

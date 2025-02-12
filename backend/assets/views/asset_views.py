@@ -1,17 +1,15 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from ..models import Asset, AssetCategory, AssetTransfer
+from ..models import Asset
 from ..serializers import AssetSerializer
 from django.db.models import Count
 
 class AssetViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Asset.objects.all()
     serializer_class = AssetSerializer
     
-    def get_queryset(self):
-        return Asset.objects.all()
-
     @action(detail=True, methods=['post'])
     def transfer(self, request, pk=None):
         try:

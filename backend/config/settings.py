@@ -18,17 +18,17 @@ DEBUG = True  # 开发环境下设置为 True
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
-    'django.contrib.admin',  # 先加载 Django 自带的应用
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users.apps.UsersConfig',  # 然后是 users 应用
+    'users.apps.UsersConfig',  # 移到这里
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'assets',  # 最后是 assets 应用
+    'assets',
 ]
 
 MIDDLEWARE = [

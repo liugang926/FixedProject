@@ -1,6 +1,9 @@
 from django.db import transaction
-from ..models.asset import Asset, AssetTransfer
-from django.contrib.auth.models import User
+from django.db.models import Count
+from assets.models import Asset, AssetCategory, AssetTransfer
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class AssetService:
     @transaction.atomic
@@ -20,7 +23,7 @@ class AssetService:
         try:
             asset = Asset.objects.get(id=asset_id)
             from_user = asset.responsible_person
-            to_user = User.objects.get(id=data['to_user_id'])
+            to_user = User.objects.get(id=data['to_user_id'])  # Updated to use custom user model
             
             transfer = AssetTransfer.objects.create(
                 asset=asset,
@@ -50,4 +53,4 @@ class AssetService:
                 'status_statistics': status_stats
             }
         except Exception as e:
-            raise Exception(f'获取统计信息失败: {str(e)}') 
+            raise Exception(f'获取统计信息失败: {str(e)}')

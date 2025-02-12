@@ -14,4 +14,9 @@ class AssetCategoryAdmin(admin.ModelAdmin):
 @admin.register(AssetTransfer)
 class AssetTransferAdmin(admin.ModelAdmin):
     list_display = ('asset', 'from_user', 'to_user', 'transfer_date')
-    list_filter = ('transfer_date',) 
+    list_filter = ('transfer_date',)
+
+# 删除这些重复的注册
+# admin.site.register(Asset)
+# admin.site.register(AssetCategory)
+# admin.site.register(AssetTransfer) 
