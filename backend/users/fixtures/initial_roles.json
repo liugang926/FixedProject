@@ -1,0 +1,26 @@
+[
+  {
+    "model": "users.role",
+    "pk": 1,
+    "fields": {
+      "name": "超级管理员",
+      "code": "admin",
+      "description": "系统超级管理员",
+      "permissions": [1, 2, 3, 4, 5],
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "users.role",
+    "pk": 2,
+    "fields": {
+      "name": "普通用户",
+      "code": "user",
+      "description": "普通用户",
+      "permissions": [],
+      "created_at": "2024-01-01T00:00:00Z",
+      "updated_at": "2024-01-01T00:00:00Z"
+    }
+  }
+] 

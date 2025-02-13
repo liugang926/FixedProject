@@ -1,32 +1,44 @@
 import Cookies from 'js-cookie'
 
-const TokenKey = 'Asset_Management_Token'
-const TokenExpireKey = 'Asset_Management_Token_Expire'
+const TokenKey = 'Admin-Token'
+const UserInfoKey = 'User-Info'
 
 // 获取token
 export function getToken() {
-  const token = Cookies.get(TokenKey)
-  const expireTime = Cookies.get(TokenExpireKey)
-  if (token && expireTime && new Date().getTime() < parseInt(expireTime)) {
-    return token
-  }
-  // token 过期或不存在，清除
-  removeToken()
-  return null
+  return localStorage.getItem(TokenKey)
 }
 
 // 设置token
 export function setToken(token) {
-  // 设置24小时过期
-  const expire = new Date().getTime() + 24 * 60 * 60 * 1000
-  Cookies.set(TokenKey, token)
-  Cookies.set(TokenExpireKey, expire.toString())
+  return localStorage.setItem(TokenKey, token)
 }
 
 // 移除token
 export function removeToken() {
+  return localStorage.removeItem(TokenKey)
+}
+
+// 获取用户信息
+export function getUserInfo() {
+  const info = localStorage.getItem(UserInfoKey)
+  return info ? JSON.parse(info) : null
+}
+
+// 设置用户信息
+export function setUserInfo(info) {
+  return localStorage.setItem(UserInfoKey, JSON.stringify(info))
+}
+
+// 移除用户信息
+export function removeUserInfo() {
+  return localStorage.removeItem(UserInfoKey)
+}
+
+// 清除认证信息
+export function clearAuth() {
+  removeToken()
+  removeUserInfo()
   Cookies.remove(TokenKey)
-  Cookies.remove(TokenExpireKey)
 }
 
 // 检查是否已登录
@@ -53,4 +65,28 @@ export function isTokenExpired() {
   } catch (e) {
     return true
   }
+}
+
+// 在现有的代码基础上添加以下函数
+export function isValidToken() {
+  const token = getToken()
+  if (!token) return false
+
+  // 如果需要验证token的有效性，可以在这里添加验证逻辑
+  return true
+}
+
+export function initializeUserState(store) {
+  const token = getToken()
+  const userInfo = getUserInfo()
+
+  if (token && userInfo) {
+    store.commit('user/SET_TOKEN', token)
+    store.commit('user/SET_NAME', userInfo.name)
+    store.commit('user/SET_AVATAR', userInfo.avatar)
+    store.commit('user/SET_ROLES', userInfo.roles)
+    store.commit('user/SET_PERMISSIONS', userInfo.permissions)
+    return true
+  }
+  return false
 } 

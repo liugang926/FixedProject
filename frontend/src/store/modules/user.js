@@ -1,14 +1,24 @@
 import { login, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getToken, setToken, getUserInfo, setUserInfo, clearAuth } from '@/utils/auth'
+import { resetRouter } from '@/router'
 
-const state = {
-  token: getToken(),
-  name: '',
-  avatar: '',
-  roles: []
+const getDefaultState = () => {
+  const userInfo = getUserInfo()
+  return {
+    token: getToken(),
+    name: userInfo?.name || '',
+    avatar: userInfo?.avatar || '',
+    roles: userInfo?.roles || [],
+    permissions: userInfo?.permissions || []
+  }
 }
 
+const state = getDefaultState()
+
 const mutations = {
+  RESET_STATE: (state) => {
+    Object.assign(state, getDefaultState())
+  },
   SET_TOKEN: (state, token) => {
     state.token = token
   },
@@ -19,7 +29,10 @@ const mutations = {
     state.avatar = avatar
   },
   SET_ROLES: (state, roles) => {
-    state.roles = roles
+    state.roles = Array.isArray(roles) ? roles : [roles].filter(Boolean)
+  },
+  SET_PERMISSIONS: (state, permissions) => {
+    state.permissions = Array.isArray(permissions) ? permissions : [permissions].filter(Boolean)
   }
 }
 
@@ -28,9 +41,9 @@ const actions = {
   login({ commit }, userInfo) {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password })
+      login({ username: username.trim(), password: password })
         .then(response => {
-          const token = response.token || response.key  // Django REST framework 返回的token在key字段
+          const { token } = response
           commit('SET_TOKEN', token)
           setToken(token)
           resolve()
@@ -42,21 +55,33 @@ const actions = {
   },
 
   // 获取用户信息
-  getInfo({ commit, state }) {
+  getInfo({ commit }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token)
+      getInfo()
         .then(response => {
-          if (!response) {
-            reject('验证失败，请重新登录')
+          const { role, name, avatar, permissions } = response
+
+          if (!role) {
+            reject(new Error('获取用户信息失败，请重新登录'))
+            return
           }
-          // 确保有默认角色
-          const roles = response.roles || ['user']
-          const name = response.name || response.username
-          const avatar = response.avatar || ''
+
+          const roles = Array.isArray(role) ? role : [role].filter(Boolean)
+          
           commit('SET_ROLES', roles)
           commit('SET_NAME', name)
           commit('SET_AVATAR', avatar)
-          resolve(response)
+          commit('SET_PERMISSIONS', permissions)
+
+          // 保存用户信息到本地存储
+          setUserInfo({
+            name,
+            avatar,
+            roles,
+            permissions
+          })
+
+          resolve({ roles, permissions })
         })
         .catch(error => {
           reject(error)
@@ -69,9 +94,9 @@ const actions = {
     return new Promise((resolve, reject) => {
       logout()
         .then(() => {
-          commit('SET_TOKEN', '')
-          commit('SET_ROLES', [])
-          removeToken()
+          clearAuth()
+          commit('RESET_STATE')
+          resetRouter()
           resolve()
         })
         .catch(error => {
@@ -80,12 +105,11 @@ const actions = {
     })
   },
 
-  // 重置token
+  // 重置 token
   resetToken({ commit }) {
     return new Promise(resolve => {
-      commit('SET_TOKEN', '')
-      commit('SET_ROLES', [])
-      removeToken()
+      clearAuth()
+      commit('RESET_STATE')
       resolve()
     })
   }

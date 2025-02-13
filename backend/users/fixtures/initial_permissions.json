@@ -1,0 +1,52 @@
+[
+  {
+    "model": "users.permission",
+    "pk": 1,
+    "fields": {
+      "name": "创建用户",
+      "code": "create_user",
+      "description": "允许创建新用户",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 2,
+    "fields": {
+      "name": "编辑用户",
+      "code": "edit_user",
+      "description": "允许编辑用户信息",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 3,
+    "fields": {
+      "name": "删除用户",
+      "code": "delete_user",
+      "description": "允许删除用户",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 4,
+    "fields": {
+      "name": "管理角色",
+      "code": "manage_roles",
+      "description": "允许管理角色",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "users.permission",
+    "pk": 5,
+    "fields": {
+      "name": "管理权限",
+      "code": "manage_permissions",
+      "description": "允许管理权限",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  }
+] 

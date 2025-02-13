@@ -11,19 +11,40 @@
       <el-menu
         :default-active="activeMenu"
         :collapse="collapsed"
-        :unique-opened="true"
+        :unique-opened="false"
         :collapse-transition="false"
         mode="vertical"
         background-color="#304156"
         text-color="#bfcbd9"
         active-text-color="#409EFF"
+        router
       >
-        <sidebar-item
-          v-for="route in routes"
-          :key="route.path"
-          :item="route"
-          :base-path="route.path"
-        />
+        <template v-for="route in routes" :key="route.path">
+          <template v-if="!route.hidden">
+            <el-menu-item v-if="!route.children || route.children.length === 0" :index="route.path">
+              <el-icon><component :is="route.meta?.icon" /></el-icon>
+              <template #title>{{ route.meta?.title }}</template>
+            </el-menu-item>
+
+            <template v-else>
+              <el-menu-item v-if="route.children.length === 1" :index="`${route.path}/${route.children[0].path}`">
+                <el-icon><component :is="route.children[0].meta?.icon" /></el-icon>
+                <template #title>{{ route.children[0].meta?.title }}</template>
+              </el-menu-item>
+
+              <el-sub-menu v-else :index="route.path">
+                <template #title>
+                  <el-icon><component :is="route.meta?.icon" /></el-icon>
+                  <span>{{ route.meta?.title }}</span>
+                </template>
+                <el-menu-item v-for="child in route.children" :key="child.path" :index="`${route.path}/${child.path}`">
+                  <el-icon><component :is="child.meta?.icon" /></el-icon>
+                  <template #title>{{ child.meta?.title }}</template>
+                </el-menu-item>
+              </el-sub-menu>
+            </template>
+          </template>
+        </template>
       </el-menu>
     </el-scrollbar>
   </div>
@@ -33,24 +54,26 @@
 import { defineComponent, computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
-import SidebarItem from './SidebarItem.vue'
 import * as ElementPlusIcons from '@element-plus/icons-vue'
 
 export default defineComponent({
   name: 'Sidebar',
   components: {
-    SidebarItem,
     ...ElementPlusIcons
   },
   setup() {
     const store = useStore()
     const route = useRoute()
 
-    const routes = computed(() => store.state.permission.routes)
-    const collapsed = computed(() => store.state.app.sidebarCollapsed)
+    const routes = computed(() => {
+      return store.state.permission.routes
+    })
+    
+    const collapsed = computed(() => store.state.app.sidebarCollapsed || false)
+    
     const activeMenu = computed(() => {
       const { meta, path } = route
-      if (meta.activeMenu) {
+      if (meta?.activeMenu) {
         return meta.activeMenu
       }
       return path
@@ -80,24 +103,33 @@ export default defineComponent({
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-    
-    .sidebar-logo {
-      width: 32px;
-      height: 32px;
+      color: #fff;
     }
     
     .sidebar-title {
       margin-left: 10px;
-      color: #fff;
       font-weight: 600;
       font-size: 16px;
       white-space: nowrap;
     }
   }
 
+  .el-scrollbar {
+    height: calc(100% - 60px);
+  }
+
   .el-menu {
     border: none;
+    height: 100%;
+    width: 100% !important;
+  }
+
+  .el-menu-item, .el-sub-menu__title {
+    .el-icon {
+      margin-right: 16px;
+      width: 24px;
+      text-align: center;
+    }
   }
 }
 </style> 

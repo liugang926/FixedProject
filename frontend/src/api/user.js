@@ -1,20 +1,14 @@
 import request from '@/utils/request'
 
+// 用户认证相关
 export function login(data) {
   return request({
-    url: '/auth-token/',
+    url: '/auth/login/',
     method: 'post',
-    data: {  // 确保数据格式正确
+    data: {
       username: data.username,
       password: data.password
     }
-  })
-}
-
-export function getInfo() {
-  return request({
-    url: '/users/me/',
-    method: 'get'
   })
 }
 
@@ -25,11 +19,33 @@ export function logout() {
   })
 }
 
+export function getInfo() {
+  return request({
+    url: '/users/me/',
+    method: 'get'
+  })
+}
+
+// 用户管理相关
 export function getUserList(params) {
   return request({
     url: '/users/',
     method: 'get',
     params
+  })
+}
+
+export function getDevelopers() {
+  return request({
+    url: '/users/developers/',
+    method: 'get'
+  })
+}
+
+export function getManagers() {
+  return request({
+    url: '/users/managers/',
+    method: 'get'
   })
 }
 
@@ -56,6 +72,70 @@ export function deleteUser(id) {
   })
 }
 
+// 角色管理相关
+export function getRoleList() {
+  return request({
+    url: '/roles/',
+    method: 'get'
+  })
+}
+
+export function createRole(data) {
+  return request({
+    url: '/roles/',
+    method: 'post',
+    data
+  })
+}
+
+export function updateRole(id, data) {
+  return request({
+    url: `/roles/${id}/`,
+    method: 'put',
+    data
+  })
+}
+
+export function deleteRole(id) {
+  return request({
+    url: `/roles/${id}/`,
+    method: 'delete'
+  })
+}
+
+// 权限管理相关
+export function getPermissionList() {
+  return request({
+    url: '/permissions/',
+    method: 'get'
+  })
+}
+
+// 用户角色关联相关
+export function assignRole(data) {
+  return request({
+    url: '/user-roles/',
+    method: 'post',
+    data
+  })
+}
+
+export function removeRole(id) {
+  return request({
+    url: `/user-roles/${id}/`,
+    method: 'delete'
+  })
+}
+
+// 用户操作相关
+export function changePassword(id, data) {
+  return request({
+    url: `/users/${id}/change_password/`,
+    method: 'post',
+    data
+  })
+}
+
 export function lockUser(id, reason) {
   return request({
     url: `/users/${id}/lock/`,
@@ -64,10 +144,27 @@ export function lockUser(id, reason) {
   })
 }
 
-export function unlockUser(id, reason) {
+export function unlockUser(id) {
   return request({
     url: `/users/${id}/unlock/`,
+    method: 'post'
+  })
+}
+
+// 更新用户个人信息
+export function updateUserProfile(data) {
+  return request({
+    url: '/api/users/profile/',
+    method: 'put',
+    data
+  })
+}
+
+// 修改密码
+export function updateUserPassword(data) {
+  return request({
+    url: '/api/users/change_password/',
     method: 'post',
-    data: { reason }
+    data
   })
 } 

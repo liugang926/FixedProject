@@ -1,39 +1,15 @@
 <template>
   <div class="dashboard-container">
     <el-row :gutter="20">
-      <el-col :span="8">
+      <el-col :span="8" v-for="(item, index) in statistics" :key="index">
         <el-card>
           <template #header>
             <div class="card-header">
-              <span>资产总数</span>
+              <span>{{ item.title }}</span>
             </div>
           </template>
           <div class="card-body">
-            <h2>{{ statistics.total || 0 }}</h2>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="8">
-        <el-card>
-          <template #header>
-            <div class="card-header">
-              <span>使用中</span>
-            </div>
-          </template>
-          <div class="card-body">
-            <h2>{{ statistics.inUse || 0 }}</h2>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="8">
-        <el-card>
-          <template #header>
-            <div class="card-header">
-              <span>闲置</span>
-            </div>
-          </template>
-          <div class="card-body">
-            <h2>{{ statistics.idle || 0 }}</h2>
+            <h2>{{ item.value }}</h2>
           </div>
         </el-card>
       </el-col>
@@ -43,23 +19,29 @@
 
 <script>
 import { defineComponent, ref, onMounted } from 'vue'
-import { getAssetStatistics } from '@/api/asset'
 import { ElMessage } from 'element-plus'
+import request from '@/utils/request'
 
 export default defineComponent({
   name: 'Dashboard',
   setup() {
-    const statistics = ref({})
+    const statistics = ref([
+      { title: '资产总数', value: 0 },
+      { title: '使用中', value: 0 },
+      { title: '闲置', value: 0 }
+    ])
 
     const fetchData = async () => {
       try {
-        const { data } = await getAssetStatistics()
-        statistics.value = data || {
-          total: 0,
-          inUse: 0,
-          idle: 0,
-          maintenance: 0,
-          scrapped: 0
+        const response = await request({
+          url: '/api/assets/statistics/',
+          method: 'get'
+        })
+        
+        if (response) {
+          statistics.value[0].value = response.total || 0
+          statistics.value[1].value = response.inUse || 0
+          statistics.value[2].value = response.idle || 0
         }
       } catch (error) {
         console.error('获取统计数据失败:', error)
@@ -78,12 +60,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .dashboard-container {
-  min-height: calc(100vh - 120px);
-  background-color: transparent;
+  padding: 20px;
   
   .el-card {
     margin-bottom: 20px;
-    box-shadow: 0 1px 4px rgba(0,21,41,.08);
     
     .card-header {
       display: flex;
@@ -93,9 +73,10 @@ export default defineComponent({
     
     .card-body {
       text-align: center;
+      padding: 20px;
       
       h2 {
-        margin: 10px 0;
+        margin: 0;
         font-size: 24px;
         color: #409EFF;
       }

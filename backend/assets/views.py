@@ -2,9 +2,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Count
 from .models import Asset
+from .serializers import AssetSerializer
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
 class AssetViewSet(viewsets.ModelViewSet):
-    # ... 其他代码 ...
+    permission_classes = [IsAuthenticated]
+    queryset = Asset.objects.all()
+    serializer_class = AssetSerializer
 
     @action(detail=False, methods=['get'])
     def statistics(self, request):

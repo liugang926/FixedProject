@@ -4,27 +4,25 @@ import store from '@/store'
 import { getToken } from '@/utils/auth'
 import router from '@/router'
 
-// 创建axios实例
+// 创建 axios 实例
 const service = axios.create({
-  baseURL: '/api', // 使用 /api 前缀
-  timeout: 5000 // 请求超时时间
+  baseURL: process.env.VUE_APP_BASE_API || 'http://localhost:8000/api',
+  timeout: 5000,
+  withCredentials: true
 })
 
 // 请求拦截器
 service.interceptors.request.use(
   config => {
-    // 在发送请求之前做些什么
-    if (store.state.user.token) {
-      const token = getToken()
-      if (token) {
-        config.headers['Authorization'] = `Token ${token}`
-      }
+    const token = getToken()
+    if (token) {
+      // 修改 token 格式
+      config.headers['Authorization'] = `Token ${token}`
     }
     return config
   },
   error => {
-    // 处理请求错误
-    console.log(error)
+    console.error('Request Error:', error)
     return Promise.reject(error)
   }
 )
@@ -32,26 +30,25 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   response => {
-    const res = response.data
-    
-    // Django REST framework 返回的数据直接使用
-    return res
+    return response.data
   },
   error => {
-    console.log('Request Error:', {
-      config: error.config,
-      response: error.response,
-      url: error.config?.url,
-      method: error.config?.method,
-      data: error.config?.data
+    console.error('Error Response:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+      config: error.config
     })
-    // 如果是401错误，说明token失效，需要重新登录
+
+    // 处理 401 错误
     if (error.response?.status === 401) {
       store.dispatch('user/resetToken')
       router.push('/login')
     }
+
+    const message = error.response?.data?.error || error.message || '请求失败'
     ElMessage({
-      message: error.response?.data?.detail || error.message || '请求失败',
+      message: message,
       type: 'error',
       duration: 5 * 1000
     })

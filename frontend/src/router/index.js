@@ -1,13 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Layout from '@/views/layout/Layout.vue'
-import { getToken } from '@/utils/auth'
-import store from '@/store'
+import Layout from '@/layout/index.vue'
 
-const routes = [
+// 基础路由
+export const constantRoutes = [
   {
     path: '/login',
-    name: 'Login',
-    component: () => import('@/views/login/Login.vue')
+    component: () => import('@/views/login/index.vue'),
+    hidden: true
   },
   {
     path: '/',
@@ -17,58 +16,116 @@ const routes = [
       {
         path: 'dashboard',
         name: 'Dashboard',
-        component: () => import('@/views/dashboard/Dashboard.vue'),
-        meta: { title: '仪表盘', icon: 'Menu', cache: true, affix: true }
-      },
+        component: () => import('@/views/dashboard/index.vue'),
+        meta: { title: '仪表盘', icon: 'Odometer', affix: true }
+      }
+    ]
+  },
+  {
+    path: '/404',
+    name: '404',
+    component: () => import('@/views/error/404.vue'),
+    hidden: true
+  },
+  {
+    path: '/profile',
+    component: Layout,
+    hidden: true,
+    children: [
       {
-        path: 'assets',
-        name: 'Assets',
-        component: () => import('@/views/assets/AssetList.vue'),
-        meta: { title: '资产管理', icon: 'Document', cache: true, affix: false }
-      },
-      {
-        path: 'users',
-        name: 'Users',
-        component: () => import('@/views/user/UserList.vue'),
-        meta: { title: '用户管理', icon: 'User', roles: ['admin'] }
+        path: '',
+        name: 'Profile',
+        component: () => import('@/views/profile/index.vue'),
+        meta: { title: '个人中心' }
       }
     ]
   }
 ]
 
-const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-  routes
-})
-
-router.beforeEach(async (to, from, next) => {
-  const hasToken = getToken()
-
-  if (hasToken) {
-    if (to.path === '/login') {
-      next({ path: '/' })
-    } else {
-      try {
-        const hasRoutes = store.state.permission.routes.length > 0
-        if (hasRoutes) {
-          next()
-        } else {
-          await store.dispatch('user/getInfo')
-          await store.dispatch('permission/generateRoutes')
-          next({ ...to, replace: true })
+// 需要根据权限动态加载的路由
+export const asyncRoutes = [
+  {
+    path: '/system',
+    component: Layout,
+    redirect: '/system/user',
+    alwaysShow: true,
+    name: 'System',
+    meta: { 
+      title: '系统管理', 
+      icon: 'Setting'
+    },
+    children: [
+      {
+        path: 'user',
+        name: 'User',
+        component: () => import('@/views/user/index.vue'),
+        meta: { 
+          title: '用户管理', 
+          icon: 'User'
         }
-      } catch (error) {
-        await store.dispatch('user/resetToken')
-        next(`/login?redirect=${to.path}`)
+      },
+      {
+        path: 'role',
+        name: 'Role',
+        component: () => import('@/views/role/index.vue'),
+        meta: { 
+          title: '角色管理', 
+          icon: 'UserFilled'
+        }
+      },
+      {
+        path: 'permission',
+        name: 'Permission',
+        component: () => import('@/views/permission/index.vue'),
+        meta: { 
+          title: '权限管理', 
+          icon: 'Lock'
+        }
       }
-    }
-  } else {
-    if (to.path === '/login') {
-      next()
-    } else {
-      next(`/login?redirect=${to.path}`)
-    }
+    ]
+  },
+  {
+    path: '/asset',
+    component: Layout,
+    redirect: '/asset/list',
+    alwaysShow: true,
+    name: 'Asset',
+    meta: { 
+      title: '资产管理', 
+      icon: 'Files'
+    },
+    children: [
+      {
+        path: 'list',
+        name: 'AssetList',
+        component: () => import('@/views/assets/AssetList.vue'),
+        meta: { 
+          title: '资产列表', 
+          icon: 'Document'
+        }
+      }
+    ]
   }
+]
+
+// 所有路由
+export const allRoutes = [...constantRoutes, ...asyncRoutes, {
+  path: '/:pathMatch(.*)*',
+  redirect: '/404',
+  hidden: true
+}]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: allRoutes // 直接使用所有路由
 })
+
+export function resetRouter() {
+  const newRouter = createRouter({
+    history: createWebHistory(),
+    routes: allRoutes
+  })
+  router.matcher = newRouter.matcher
+}
 
 export default router 

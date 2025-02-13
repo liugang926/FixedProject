@@ -1,11 +1,11 @@
 <template>
-  <div class="app-wrapper" :class="{'hide-sidebar': collapsed}">
+  <div class="app-wrapper">
     <sidebar class="sidebar-container" />
     <div class="main-container">
-      <div class="fixed-header">
-        <navbar />
+      <navbar />
+      <div class="app-main">
+        <router-view />
       </div>
-      <app-main />
     </div>
   </div>
 </template>
@@ -13,14 +13,12 @@
 <script>
 import { defineComponent } from 'vue'
 import { Navbar, Sidebar } from '@/components/layout'
-import AppMain from './components/AppMain.vue'
 
 export default defineComponent({
   name: 'Layout',
   components: {
     Navbar,
-    Sidebar,
-    AppMain
+    Sidebar
   }
 })
 </script>
@@ -30,7 +28,6 @@ export default defineComponent({
   position: relative;
   height: 100vh;
   width: 100%;
-  overflow: hidden;
   
   .sidebar-container {
     position: fixed;
@@ -38,43 +35,21 @@ export default defineComponent({
     left: 0;
     bottom: 0;
     width: 200px;
-    transition: width 0.3s;
     z-index: 1001;
-    overflow: hidden;
+    background-color: #304156;
+    transition: width 0.3s;
   }
   
   .main-container {
     min-height: 100%;
     margin-left: 200px;
     position: relative;
-    transition: margin-left 0.3s;
-    display: flex;
-    flex-direction: column;
-    background-color: #f0f2f5;
     
-    .fixed-header {
-      position: fixed;
-      top: 0;
-      right: 0;
-      z-index: 1000;
-      width: calc(100% - 200px);
-      transition: width 0.3s;
-      background-color: #fff;
-      box-shadow: 0 1px 4px rgba(0,21,41,.08);
-    }
-  }
-  
-  &.hide-sidebar {
-    .sidebar-container {
-      width: 54px;
-    }
-    
-    .main-container {
-      margin-left: 54px;
-      
-      .fixed-header {
-        width: calc(100% - 54px);
-      }
+    .app-main {
+      padding: 20px;
+      min-height: calc(100vh - 60px);
+      margin-top: 60px;
+      background-color: #f0f2f5;
     }
   }
 }
